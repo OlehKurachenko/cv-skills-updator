@@ -1,72 +1,80 @@
 // Class Skill
-function Skill(name, rate, commercialExperienceRate, overallExperienceRate) {
+function Skill(name, rate, commercialExperienceRate, overallExperienceRate, interestRate, isImportant) {
   
-  function checkRateValue (rateValue, parameterName) {
-    if (rateValue < 0 || rateValue > 5)
-      throw "Bad " + parameterName + " value";
-  };
-  
-  checkRateValue(rate, "rate");
-  checkRateValue(commercialExperienceRate, "commercial experience rate");
-  checkRateValue(overallExperienceRate, "overall experience rate");
-  
-  var this_name = name;
-  var this_rate = rate;
-  var this_commercialExperienceRate = commercialExperienceRate;
-  var this_overallExperienceRate = overallExperienceRate;
-  
-  this.getName = function() {
-    return this_name;
-  };
-  this.setName = function(name) {
-    this_name = name;
-  };
-  this.getName = function() {
-    return this_rate;
-  };
-  this.setRate = function(rate) {
-    checkRateValue(rate);
-    this_rate = rate;
-  };
-  this.getRate = function() {
-    return this_rate;
-  };
-  this.setCommercialExperienceRate = function(commercialExperienceRate) {
-    checkRateValue(commercialExperienceRate, "commercial experience rate");
-    this_commercialExperienceRate = commercialExperienceRate;
-  };
-  this.getCommercialExperienceRate = function() {
-    return this_commercialExperienceRate;
-  };
-  this.setOverallExperienceRate = function(overallExperienceRate) {
-    checkRateValue(overallExperienceRate, "overall experience rate");
-    this_overallExperienceRate = overallExperienceRate;
-  };
-  this.getOverallExperienceRate = function() {
-    return this_overallExperienceRate;
-  };
+  this.name = name;
+  this.rate = rate;
+  this.commercialExperienceRate = commercialExperienceRate;
+  this.overallExperienceRate = overallExperienceRate;
+  this.interestRate = interestRate;
+  this.isImportant = isImportant;
   
   this.toString = function() {
-    return "Skill " + this_name + ", rate: " + this_rate + ", commercial experience rate: "
-    + this_commercialExperienceRate + ", overall experience rate: " + this_overallExperienceRate;
+    return "Skill " + this.name + ", rate: " + this.rate + ", commercial experience rate: "
+    + this.commercialExperienceRate + ", overall experience rate: " + this.overallExperienceRate
+    + ", interest rate: " + this.interestRate + ", important: " + this.isImportant;
   }
 }
 
 // Class SkillCathegory
-function SkillCathegory() {
+function SkillCathegory(mainSkill) {
+  this.mainSkill = mainSkill;
+  this.subskills = [];
   
+  this.toString = function() {
+    var result =  "Skill cathegory " + this.mainSkill.name + "\n";
+    result += this.mainSkill.toString() + "\n";
+    for (var i = 0; i < this.subskills.length; ++i) {
+      result += "  " + this.subskills[i].toString() + "\n";
+    }
+    return result;
+  }
 }
 
 //// Class SkillTree
-//function SkillTree() {
-//  
-//}
+function SkillTree(name) {
+  this.name = name;
+  this.skills = [];
+  
+  this.toString = function() {
+    var result = "Skill tree " + this.name + "\n";
+    for (var i = 0; i < this.skills.length; ++i) {
+      result += this.skills[i].toString() + "\n";
+    }
+    return result;
+  }
+}
 
 // Classes read utill section
 
-function parseSkillFromSheetLine(sheet, line) {
+function parseSkill(sheet, line) {
   var data = sheet.getDataRange().getValues();
-  return new Skill(data[line][0] + data[line][1], parseInt(data[line][2]), parseInt(data[line][3]), parseInt(data[line][4]));
+  return new Skill(
+    data[line][0] + data[line][1], // Skill name
+    parseInt(data[line][2]), // Skill rate
+    parseInt(data[line][3]), // Skill commercial experince rate
+    parseInt(data[line][4]), // Skill overall experience rate
+    parseInt(data[line][5]), // Skill interest rate
+    sheet.getDataRange().getCell(line + 1, 6).getNote().trim().split(/\s+/)[0] === "Important" // Skill is important
+  );
+}
+
+function parseSkillTree(sheet) {
+  var data = sheet.getDataRange().getValues();
+  var skillTree = new SkillTree(sheet.getName());
+  var skillCathegory = null;
+  
+  for (var i = 1; i < data.length; ++i) {
+    if (data[i][0] != "") {
+      if (skillCathegory !== null)
+        skillTree.skills.push(skillCathegory);
+      skillCathegory = new SkillCathegory(parseSkill(sheet, i));
+    } else {
+      skillCathegory.subskills.push(parseSkill(sheet, i));
+    }
+  }
+  if (skillCathegory !== null)
+    skillTree.skills.push(skillCathegory);
+  return skillTree;
 }
 
 function main() {
@@ -74,14 +82,28 @@ function main() {
   var skillsTableFile = directory.getFilesByName("Skills Tracker").next();
   var skillsTable = SpreadsheetApp.openById(skillsTableFile.getId());
   
+  var skillsSheets = skillsTable.getSheets();
+  var skillTrees = [];
+  
   // Test section
   
-  var sheets = skillsTable.getSheets();
-  for (var i = 0; i < sheets.length; ++i) {
-    Logger.log(sheets[i].getName());
-  }
+  var skillTree = parseSkillTree(skillsSheets[0]);
   
-  Logger.log(parseSkillFromSheetLine(sheets[0], 1).toString());
+  Logger.log(skillTree.toString());
+  
+//  var sheets = skillsTable.getSheets();
+//  for (var i = 0; i < sheets.length; ++i) {
+//    Logger.log(sheets[i].getName());
+//  }
+  
+  //Logger.log(parseSkillFromSheetLine(sheets[0], 1).toString()); // OK!
   
   // TODO write
+  
+  
+  
+//  for (var i = 0; i < SkillsSheets.length; ++i) {
+//    
+//  }
+  
 }

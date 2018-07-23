@@ -9,7 +9,7 @@ function createDocument() {
 
 function editDocument() {
   var directory = DriveApp.getFoldersByName('Google Script examples').next();
-  var docFile = directory.getFilesByName("Skills Card").next();
+  var docFile = directory.getFilesByName("Skills Card Copy").next();
   var doc = DocumentApp.openById(docFile.getId());
   
 //  for (var paragraph in doc.getBody().getParagraphs())

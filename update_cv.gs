@@ -161,7 +161,7 @@ function createSkillCard(skillTrees) {
       text.setForegroundColor((main) ? "#666666" : "#999999");
     }
     
-    var text = skillP.appendText("\t" + skill.name);
+    var text = skillP.appendText("     " + skill.name);
     text.setForegroundColor("#000000");
     if (main)
       text.setBold(true);
@@ -184,9 +184,9 @@ function createSkillCard(skillTrees) {
   skillCardDir.addFile(skillCardFile);
   DriveApp.getRootFolder().removeFile(skillCardFile);
   
-  // headings
-  
   var skillCardBody = skillCardDoc.getBody();
+  
+  // headings
   
   var header = skillCardBody.appendParagraph("Skill Card");
   header.setHeading(DocumentApp.ParagraphHeading.HEADING1);
@@ -197,7 +197,7 @@ function createSkillCard(skillTrees) {
   subheader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
   subheader.setLinkUrl("https://drive.google.com/open?id=1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"); // link to CV doc
   
-  var rateMeasurmentDetails = skillCardBody.appendParagraph("A scale: Used once ➡️ Novice ➡️ Junior ➡️ Middle ➡️ Senior");
+  var rateMeasurmentDetails = skillCardBody.appendParagraph("Scale: Used once | Novice |️ Junior | Middle |️ Senior");
   rateMeasurmentDetails.editAsText().setForegroundColor("#999999");
   rateMeasurmentDetails.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
   
@@ -220,7 +220,7 @@ function createSkillCard(skillTrees) {
       for (var l = 0; l < skill.subskills.length; ++l) {
         if (skill.subskills[l].rate == 0)
           break;
-        addFormatedSkill("\t", skillCardBody, skill.subskills[l], false);
+        addFormatedSkill("    ", skillCardBody, skill.subskills[l], false);
       }
     }
   }
@@ -236,6 +236,143 @@ function createSkillCard(skillTrees) {
   
   footer.editAsText().setForegroundColor("#999999");
   footer.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+}
+
+function createSkillImprovementTaskCard(skillTrees) {
+  if (!skillTrees)
+    skillTrees = getSkillTrees();
+  
+  var skillCardDirName = "Google Script examples";
+  var skillCardFileName = "Test Skill Improvements Task Card " + Utilities.formatDate(new Date(), "GMT+3", "MMM dd yyyy");
+  
+  var skillCardDir = DriveApp.getFoldersByName(skillCardDirName).next();
+  
+  if (skillCardDir.getFilesByName(skillCardFileName).hasNext()) {
+    skillCardDir.removeFile(skillCardDir.getFilesByName(skillCardFileName).next());
+  }
+  
+  var skillCardDoc = DocumentApp.create(skillCardFileName);
+  var skillCardFile = DriveApp.getFileById(skillCardDoc.getId());
+  skillCardDir.addFile(skillCardFile);
+  DriveApp.getRootFolder().removeFile(skillCardFile);
+  
+  var skillCardBody = skillCardDoc.getBody();
+  
+  // headings
+  
+  var header = skillCardBody.appendParagraph("Skill Improvement Task Card");
+  header.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  header.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  
+  var date = new Date();
+  var lastDate = new Date();
+  var days = 1;
+  
+  while (Utilities.formatDate(lastDate, "GMT+3", "EEE") != "Fri") {
+    ++days;
+    lastDate.setDate(lastDate.getDate() + 1);
+  }
+  
+  Logger.log("days=" + days); 
+  
+  var dateSubheader = skillCardBody.appendParagraph(
+    Utilities.formatDate(date, "GMT+3", "MMM dd yyyy") + " - "
+    + Utilities.formatDate(lastDate, "GMT+3", "MMM dd yyyy")
+  );
+  dateSubheader.setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  dateSubheader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  dateSubheader.setSpacingBefore(0);
+  dateSubheader.setSpacingAfter(0);
+  
+  var subheader = skillCardBody.appendParagraph("Oleh Kurachenko");
+  subheader.setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  subheader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  subheader.setLinkUrl("https://drive.google.com/open?id=1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"); // link to CV doc
+  subheader.setSpacingBefore(0);
+  
+  var rateMeasurmentDetails = skillCardBody.appendParagraph(
+    "Scale: Used once | Novice |️ Junior | Middle |️ Senior"
+  );
+  rateMeasurmentDetails.editAsText().setForegroundColor("#999999");
+  rateMeasurmentDetails.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  
+  skillCardBody.getParagraphs()[0].removeFromParent();
+  
+  // body
+  
+  skills = [];
+  for (var i = 0; i < skillTrees.length; ++i) {
+    var skillTree = skillTrees[i];
+    for (var j = 0; j < skillTree.skills.length; ++j) {
+      var skill = skillTree.skills[j];
+      skills.push(new Skill(
+        skill.mainSkill.name, skill.mainSkill.rate, skill.mainSkill.commercialExperienceRate,
+        skill.mainSkill.overallExperienceRate, skill.mainSkill.interestRate, skill.mainSkill.isImportant
+      ));
+      Logger.log("Len: " + skill.subskills.length);
+      for (var l = 0; l < skill.subskills.length; ++l) {
+        Logger.log("Here!");
+        var subskill = skill.subskills[l];
+        skills.push(new Skill(
+          skill.mainSkill.name + ": " + subskill.name, subskill.rate, subskill.commercialExperienceRate,
+          subskill.overallExperienceRate, subskill.interestRate, subskill.isImportant
+        ));
+      }
+    }
+  }
+  
+  skills.sort(function(v1, v2) {
+    return -1 * skillInterestComparator(v1, v2);
+  });
+  
+  for (var i = 0; i < days; ++i) {
+    var skill = skills[i];
+    
+    var skillP = skillCardBody.appendParagraph("");
+    skillP.setSpacingBefore(16);
+    
+    for (var k = 0; k < 5; ++k) {
+      var text = skillP.appendText((k < skill.rate) ? "⬛" : "⬜");
+      text.setForegroundColor("#666666");
+    }
+    
+    skillP.appendText("  ");
+    var text = skillP.appendText(skill.name);
+    text.setForegroundColor("#000000");
+    text.setBold(true);
+    
+    for (var k = 0; k < 43; ++k) { // 43 is line length
+      if (k > skill.name.length)
+        skillP.appendText(" ");
+    }
+    
+    for (var k = 0; k < 5; ++k) {
+      var text = skillP.appendText("🕑");
+      if (k < skill.commercialExperienceRate) {
+        text.setBold(true);
+        text.setForegroundColor("#000000");
+      } else if (k < skill.overallExperienceRate) {
+        text.setBold(false);
+        text.setForegroundColor("#000000");
+      } else {
+        text.setBold(false);
+        text.setForegroundColor("#b7b7b7");
+      }
+    }
+    var text = skillP.appendText("  ");
+    
+    for (var k = 0; k < 5; ++k) {
+      var text = skillP.appendText((k < skill.rate) ? "★" : "☆");
+      text.setBold(true);
+      text.setForegroundColor("#000000");
+    }
+    if (skill.isImportant) {
+      var text = skillP.appendText("❗");
+      text.setBold(false);
+    }
+    
+    skillP.editAsText().setFontFamily("Cousine");
+  }
 }
 
 function main() {

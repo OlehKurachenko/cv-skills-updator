@@ -1,3 +1,11 @@
+//
+//  This script is written to manage CV and skills by creating and
+//  updating some documents.
+//
+//  Author: Oleh Kurachenko aka okurache
+//  oleh.kurachenko@gmail.com
+//
+
 // Class Skill
 var Skill = function (name, rate, commercialExperienceRate, overallExperienceRate, interestRate, isImportant) {
   

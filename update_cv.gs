@@ -454,17 +454,20 @@ function createSkillImprovementCard() {
 
   // sending email
   skillCardDoc.saveAndClose();
+  
+  var html = HtmlService.createTemplateFromFile(
+        'skill_improvement_card_update_email')
+  html.link = skillCardFile.getUrl();
+  
   GmailApp.sendEmail(
     "oleh.kurachenko@gmail.com",
-    "Skills improvement card card updated",
+    "Skills improvement card updated",
     "",
     {
       name: "CV Updater script",
-      htmlBody: HtmlService.createHtmlOutputFromFile(
-        'skill_improvement_card_update_email').getContent(),
+      htmlBody: html.evaluate().getContent(),
       attachments: [
-        skillCardFile.getAs(MimeType.PDF.toString()),
-        skillCardFile.getAs(MimeType.GOOGLE_DOCS.toString())
+        skillCardFile.getAs(MimeType.PDF.toString())
       ]
     });
 }

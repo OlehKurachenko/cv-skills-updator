@@ -1,5 +1,5 @@
 // Class Skill
-function Skill(name, rate, commercialExperienceRate, overallExperienceRate, interestRate, isImportant) {
+var Skill = function (name, rate, commercialExperienceRate, overallExperienceRate, interestRate, isImportant) {
   
   this.name = name;
   this.rate = rate;
@@ -176,7 +176,7 @@ function createSkillCard(skillTrees) {
   var skillCardDir = DriveApp.getFoldersByName(skillCardDirName).next();
   
   if (skillCardDir.getFilesByName(skillCardFileName).hasNext()) {
-    skillCardDir.removeFile(skillCardDir.getFilesByName(skillCardFileName).next());
+    skillCardDir.getFilesByName(skillCardFileName).next().setTrashed(true);
   }
   
   var skillCardDoc = DocumentApp.create(skillCardFileName);
@@ -248,7 +248,7 @@ function createSkillImprovementTaskCard(skillTrees) {
   var skillCardDir = DriveApp.getFoldersByName(skillCardDirName).next();
   
   if (skillCardDir.getFilesByName(skillCardFileName).hasNext()) {
-    skillCardDir.removeFile(skillCardDir.getFilesByName(skillCardFileName).next());
+    skillCardDir.getFilesByName(skillCardFileName).next().setTrashed(true);
   }
   
   var skillCardDoc = DocumentApp.create(skillCardFileName);
@@ -349,28 +349,28 @@ function createSkillImprovementTaskCard(skillTrees) {
     }
     
     for (var k = 0; k < 5; ++k) {
-      var text = skillP.appendText("🕑");
+      var text = skillP.appendText("▶");
       if (k < skill.commercialExperienceRate) {
         text.setBold(true);
         text.setForegroundColor("#000000");
       } else if (k < skill.overallExperienceRate) {
-        text.setBold(false);
-        text.setForegroundColor("#000000");
+        text.setBold(true);
+        text.setForegroundColor("#666666");
       } else {
-        text.setBold(false);
+        text.setBold(true);
         text.setForegroundColor("#b7b7b7");
       }
     }
     var text = skillP.appendText("  ");
     
     for (var k = 0; k < 5; ++k) {
-      var text = skillP.appendText((k < skill.rate) ? "★" : "☆");
-      text.setBold(true);
+      var text = skillP.appendText((k < skill.interestRate) ? "★" : "☆");
+      text.setBold(false);
       text.setForegroundColor("#000000");
     }
     if (skill.isImportant) {
-      var text = skillP.appendText("❗");
-      text.setBold(false);
+      var text = skillP.appendText("!");
+      text.setBold(true);
     }
     
     skillP.editAsText().setFontFamily("Cousine");
@@ -408,6 +408,14 @@ function createSkillImprovementTaskCard(skillTrees) {
   
   footer.editAsText().setForegroundColor("#999999");
   footer.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  
+  skillCardDoc.saveAndClose();
+  GmailApp.sendEmail("oleh.kurachenko@gmail.com", "Skills improvement task card card updated", "", 
+    {
+      name: "CV Updator script",
+      htmlBody: HtmlService.createHtmlOutputFromFile('skill_improvement_task_card_update_email').getContent(),
+      attachments: [skillCardFile.getAs(MimeType.PDF)]
+    });
 }
 
 function main() {

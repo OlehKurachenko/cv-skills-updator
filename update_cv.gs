@@ -198,10 +198,9 @@ var appendDocFooter = function (body) {
 
 // API
 
-// deletes an old skill card and creates new one with data from table
-// (accessed by getSkillTrees() )
+// rewrites skills card Document with data from skills tracker table
 // noinspection JSUnusedGlobalSymbols
-function createSkillCard() {
+function updateSkillCard() {
 
   // appends body with new paragraph containing information about skill
   function appendSkillParagraph(body, skill, isMain) {
@@ -223,24 +222,14 @@ function createSkillCard() {
     }
   }
 
-  // constants
-  var skillCardDirName = "CV";
-  var skillCardFileName = "Test Skill Card";
-
-  // loading Drive & Docs resources
-  var skillCardDir = DriveApp.getFoldersByName(skillCardDirName).next();
-
-  if (skillCardDir.getFilesByName(skillCardFileName).hasNext()) {
-    skillCardDir.getFilesByName(skillCardFileName).next().setTrashed(true);
-  }
-
-  var skillCardDoc = DocumentApp.create(skillCardFileName);
-  var skillCardFile = DriveApp.getFileById(skillCardDoc.getId());
-  skillCardDir.addFile(skillCardFile);
-  DriveApp.getRootFolder().removeFile(skillCardFile);
+  // Skill Card spreadsheet direct Id
+  var skillCardDoc = DocumentApp.openById("1DUKIPzoZdgpsPagfpTuCNnwXELXOkTMK92JidIgJvg4");
 
   var skillCardBody = skillCardDoc.getBody();
   var skillTrees = getSkillTrees();
+
+  // cleaning document
+  skillCardBody.clear();
 
   // appending headings
 

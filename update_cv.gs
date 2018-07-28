@@ -217,9 +217,9 @@ function createSkillCard() {
     text.setForegroundColor("#000000");
     if (isMain) {
       text.setBold(true);
-      skillP.editAsText().setFontSize(9);
-    } else {
       skillP.editAsText().setFontSize(11);
+    } else {
+      skillP.editAsText().setFontSize(9);
     }
   }
 

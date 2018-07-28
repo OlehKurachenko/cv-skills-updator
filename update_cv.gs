@@ -277,6 +277,80 @@ function updateSkillCard() {
   appendDocFooter(skillCardBody);
 }
 
+// Updates CV skill brief section in Ukrainian and English version
+// noinspection JSUnusedGlobalSymbols
+function updateCVSkillBriefSection() {
+  // constants
+  var skillMinRate = 2;
+
+  // English CV Document direct Id
+  var cVEngDoc = DocumentApp.openById("1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA");
+  // Ukrainian CV Document direct Id
+  var cVUaDoc = DocumentApp.openById("1xuQ7q-GeiNcQO24LxWJwMBUludryIF5MeqInhMq7QDM");
+  var skillTrees = getSkillTrees();
+
+  // Searching for places in documents
+  var cVEngParagraphs = cVEngDoc.getBody().getParagraphs();
+  var cVEngSkillBriefPosition;
+  var cVUaParagraphs = cVUaDoc.getBody().getParagraphs();
+  var cVUaSkillBriefPosition;
+
+  for (cVEngSkillBriefPosition = 0;
+       cVEngParagraphs[cVEngSkillBriefPosition].getText().substring(0, 12) !== "Skills brief";
+       ++cVEngSkillBriefPosition)
+    ;
+  ++cVEngSkillBriefPosition;
+  for (var i = cVEngSkillBriefPosition; cVEngParagraphs[i].getText()[0] === "⬛"; ++i)
+    cVEngParagraphs[i].removeFromParent();
+
+  for (cVUaSkillBriefPosition = 0;
+       cVUaParagraphs[cVUaSkillBriefPosition].getText().substring(0, 15) !== "Ключові навички";
+       ++cVUaSkillBriefPosition)
+      ;
+  ++cVUaSkillBriefPosition;
+  for (var i = cVUaSkillBriefPosition; cVUaParagraphs[i].getText()[0] === "⬛"; ++i)
+      cVUaParagraphs[i].removeFromParent();
+
+  var valuableSkills = [];
+  for (var i = 0; i < skillTrees.length; ++i) {
+    var skillTree = skillTrees[i];
+    skillTree.sortByRate();
+
+    for (var j = 0; j < skillTree.skills.length; ++j) {
+      if (skillTree.skills[j].mainSkill.rate >= skillMinRate)
+        valuableSkills.push(skillTree.skills[j].mainSkill);
+    }
+  }
+
+  valuableSkills.sort(function (a, b) {
+    return -1 * skillRateComparator(a, b);
+  });
+
+  for (var i = 0; i < valuableSkills.length; ++i) {
+    var paragraph = cVEngDoc.getBody().insertParagraph(cVEngSkillBriefPosition, "");
+    var paragraphUa = cVUaDoc.getBody().insertParagraph(cVUaSkillBriefPosition, "");
+
+    for (var k = 0; k < 5; ++k) {
+        var text = paragraph.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");
+        var text2 = paragraphUa.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");
+        text.setForegroundColor("#666666");
+        text2.setForegroundColor("#666666");
+    }
+
+    text = paragraph.appendText("     " + valuableSkills[i].name);
+    text.setForegroundColor("#000000");
+    text.setBold(true);
+    ++cVEngSkillBriefPosition;
+    text = paragraphUa.appendText("     " + valuableSkills[i].name);
+    text.setForegroundColor("#000000");
+    text.setBold(true);
+    ++cVUaSkillBriefPosition;
+  }
+
+  cVEngDoc.saveAndClose();
+  cVUaDoc.saveAndClose();
+}
+
 // deletes and old skill improvement card (if it has the same name) and
 // creates a new one. Skill improvement card contains tasks for a week
 // to improve skill

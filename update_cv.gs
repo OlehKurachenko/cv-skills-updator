@@ -282,6 +282,7 @@ function updateCVSkillBriefSection() {
   // constants
   var skillMinRate = 2;
 
+  var skillTrees = getSkillTrees();
   var cVs = [
       {
         // Ukrainian CV document direct ID
@@ -322,7 +323,7 @@ function updateCVSkillBriefSection() {
              0, cV.skillSectionHeading.length) !== cV.skillSectionHeading;
          ++skillParagraphIndx)
       ;
-    for (var i = skillParagraphIndx; paragraphs[i].getText()[0] === "⬛")
+    for (var i = skillParagraphIndx; paragraphs[i].getText()[0] === "⬛"; ++i)
       paragraphs[i].removeFromParent();
 
     for (var i = 0; i < valuableSkills.length; ++i) {

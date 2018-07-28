@@ -323,6 +323,7 @@ function updateCVSkillBriefSection() {
              0, cV.skillSectionHeading.length) !== cV.skillSectionHeading;
          ++skillParagraphIndx)
       ;
+    ++skillParagraphIndx;
     for (var i = skillParagraphIndx; paragraphs[i].getText()[0] === "⬛"; ++i)
       paragraphs[i].removeFromParent();
 

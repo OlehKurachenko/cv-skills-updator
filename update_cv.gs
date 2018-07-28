@@ -23,6 +23,7 @@ var Skill = function (name, rate, commercialExperienceRate,
   this.interestRate = interestRate;
   this.isImportant = isImportant;
 
+  // noinspection JSUnusedGlobalSymbols
   this.toString = function () {
     return "Skill " + this.name + ", rate: " + this.rate
       + ", commercial experience rate: " + this.commercialExperienceRate
@@ -37,6 +38,7 @@ var SkillCathegory = function (mainSkill) {
   this.mainSkill = mainSkill;
   this.subskills = [];
 
+  // noinspection JSUnusedGlobalSymbols
   this.toString = function () {
     var result = "Skill cathegory " + this.mainSkill.name + "\n";
     result += this.mainSkill.toString() + "\n";
@@ -64,6 +66,7 @@ var SkillTree = function (name) {
     });
   };
 
+  // noinspection JSUnusedGlobalSymbols
   this.toString = function () {
     var result = "Skill tree " + this.name + "\n";
     for (var i = 0; i < this.skills.length; ++i) {
@@ -158,13 +161,8 @@ var skillCathegoryRateComparator = function (skillCat1, skillCat2) {
 // Data & Drive Utils
 
 var getSkillTrees = function () {
-  // TODO change data source to stable
-  var dataDirName = "Google Script examples";
-  var dataFileName = "Skills Tracker";
-
-  var directory = DriveApp.getFoldersByName(dataDirName).next();
-  var skillsTableFile = directory.getFilesByName(dataFileName).next();
-  var skillsTable = SpreadsheetApp.openById(skillsTableFile.getId());
+  // Skill Table spreadsheet direct Id
+  var skillsTable = SpreadsheetApp.openById("1Re-gVD9OW57C94XR53CBr4UJVud5ywJOv7xlt60OWmY");
 
   var sheets = skillsTable.getSheets();
   var skillTrees = [];
@@ -201,6 +199,7 @@ var appendDocFooter = function (body) {
 
 // deletes an old skill card and creates new one with data from table
 // (accessed by getSkillTrees() )
+// noinspection JSUnusedGlobalSymbols
 function createSkillCard() {
 
   // appends body with new paragraph containing information about skill
@@ -244,17 +243,17 @@ function createSkillCard() {
   header.setHeading(DocumentApp.ParagraphHeading.HEADING1);
   header.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
 
-  var subheader = skillCardBody.appendParagraph("Oleh Kurachenko");
-  subheader.setHeading(DocumentApp.ParagraphHeading.HEADING2);
-  subheader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-  subheader.setLinkUrl(
+  var subHeader = skillCardBody.appendParagraph("Oleh Kurachenko");
+  subHeader.setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  subHeader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  subHeader.setLinkUrl(
     "https://drive.google.com/" +
     "open?id=1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"); // link to CV doc
 
-  var rateMeasurmentDetails = skillCardBody.appendParagraph(
+  var rateMeasurementDetails = skillCardBody.appendParagraph(
       "Scale: Used once | Novice |️ Junior | Middle |️ Senior");
-  rateMeasurmentDetails.editAsText().setForegroundColor("#999999");
-  rateMeasurmentDetails.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+  rateMeasurementDetails.editAsText().setForegroundColor("#999999");
+  rateMeasurementDetails.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
 
   skillCardBody.getParagraphs()[0].removeFromParent();
 
@@ -287,6 +286,7 @@ function createSkillCard() {
 // deletes and old skill improvement card (if it has the same name) and
 // creates a new one. Skill improvement card contains tasks for a week
 // to improve skill
+// noinspection JSUnusedGlobalSymbols
 function createSkillImprovementCard() {
 
   // constants
@@ -457,7 +457,8 @@ function createSkillImprovementCard() {
   skillCardDoc.saveAndClose();
   
   var html = HtmlService.createTemplateFromFile(
-        'skill_improvement_card_update_email')
+        'skill_improvement_card_update_email');
+  // noinspection JSUndefinedPropertyAssignment
   html.link = skillCardFile.getUrl();
   
   GmailApp.sendEmail(

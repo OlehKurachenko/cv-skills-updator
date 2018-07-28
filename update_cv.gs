@@ -397,7 +397,8 @@ function createSkillImprovementCard() {
     text.setForegroundColor("#000000");
     text.setBold(true);
 
-    for (var k = 0; k < 44; ++k) { // 44 is line length
+    // 40 is line length (to be ok with Mac and Ubuntu fonts)
+    for (var k = 0; k < 40; ++k) {
       if (k > skill.name.length)
         skillP.appendText(" ");
     }

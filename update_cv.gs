@@ -183,8 +183,7 @@ var appendDocFooter = function (body) {
   var text;
 
   text = footer.appendText("a script");
-  text.setLinkUrl(
-    "https://github.com/OlehKurachenko/cv-skills-updator/tree/test");
+  text.setLinkUrl("https://github.com/OlehKurachenko/cv-skills-updator");
 
   text = footer.appendText(" at " + Utilities.formatDate(new Date(),
     "GMT+3", "EEEEEEEEEE, MMMMMMMMMM dd yyyy, hh:mm:ss aa"));
@@ -283,74 +282,65 @@ function updateCVSkillBriefSection() {
   // constants
   var skillMinRate = 2;
 
-  // English CV Document direct Id
-  var cVEngDoc = DocumentApp.openById("1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA");
-  // Ukrainian CV Document direct Id
-  var cVUaDoc = DocumentApp.openById("1xuQ7q-GeiNcQO24LxWJwMBUludryIF5MeqInhMq7QDM");
-  var skillTrees = getSkillTrees();
+  var cVs = [
+      {
+        // Ukrainian CV document direct ID
+        doc: DocumentApp.openById("1xuQ7q-GeiNcQO24LxWJwMBUludryIF5MeqInhMq7QDM"),
+        skillSectionHeading: "Ключові навички"
+      },
+      {
+        // English CV document direct ID
+        doc: DocumentApp.openById("1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"),
+        skillSectionHeading: "Skills brief"
+      }
+  ];
+
+  // Getting list of valuable skills
+  var valuableSkills = [];
+    for (var i = 0; i < skillTrees.length; ++i) {
+        var skillTree = skillTrees[i];
+        skillTree.sortByRate();
+
+        for (var j = 0; j < skillTree.skills.length; ++j) {
+            if (skillTree.skills[j].mainSkill.rate >= skillMinRate)
+                valuableSkills.push(skillTree.skills[j].mainSkill);
+        }
+    }
+
+    valuableSkills.sort(function (a, b) {
+        return -1 * skillRateComparator(a, b);
+    });
 
   // Searching for places in documents
-  var cVEngParagraphs = cVEngDoc.getBody().getParagraphs();
-  var cVEngSkillBriefPosition;
-  var cVUaParagraphs = cVUaDoc.getBody().getParagraphs();
-  var cVUaSkillBriefPosition;
+  for (var docI = 0; docI < cVs.length; ++docI) {
+    var cV = cVs[docI];
+    var skillParagraphIndx;
 
-  for (cVEngSkillBriefPosition = 0;
-       cVEngParagraphs[cVEngSkillBriefPosition].getText().substring(0, 12) !== "Skills brief";
-       ++cVEngSkillBriefPosition)
-    ;
-  ++cVEngSkillBriefPosition;
-  for (var i = cVEngSkillBriefPosition; cVEngParagraphs[i].getText()[0] === "⬛"; ++i)
-    cVEngParagraphs[i].removeFromParent();
-
-  for (cVUaSkillBriefPosition = 0;
-       cVUaParagraphs[cVUaSkillBriefPosition].getText().substring(0, 15) !== "Ключові навички";
-       ++cVUaSkillBriefPosition)
+    var paragraphs = cV.doc.getBody().getParagraphs();
+    for (skillParagraphIndx = 0;
+         paragraphs[skillParagraphIndx].getText().substring(
+             0, cV.skillSectionHeading.length) !== cV.skillSectionHeading;
+         ++skillParagraphIndx)
       ;
-  ++cVUaSkillBriefPosition;
-  for (var i = cVUaSkillBriefPosition; cVUaParagraphs[i].getText()[0] === "⬛"; ++i)
-      cVUaParagraphs[i].removeFromParent();
+    for (var i = skillParagraphIndx; paragraphs[i].getText()[0] === "⬛")
+      paragraphs[i].removeFromParent();
 
-  var valuableSkills = [];
-  for (var i = 0; i < skillTrees.length; ++i) {
-    var skillTree = skillTrees[i];
-    skillTree.sortByRate();
+    for (var i = 0; i < valuableSkills.length; ++i) {
+      var paragraph = cV.doc.getBody().insertParagraph(skillParagraphIndx, "\t");
 
-    for (var j = 0; j < skillTree.skills.length; ++j) {
-      if (skillTree.skills[j].mainSkill.rate >= skillMinRate)
-        valuableSkills.push(skillTree.skills[j].mainSkill);
-    }
-  }
+      for (var k = 0; k < 5; ++k) {
+          var text = paragraph.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");
+          text.setForegroundColor("#666666");
+      }
 
-  valuableSkills.sort(function (a, b) {
-    return -1 * skillRateComparator(a, b);
-  });
-
-  for (var i = 0; i < valuableSkills.length; ++i) {
-    var paragraph = cVEngDoc.getBody().insertParagraph(cVEngSkillBriefPosition, "");
-    var paragraphUa = cVUaDoc.getBody().insertParagraph(cVUaSkillBriefPosition, "");
-
-    paragraph.appendText("\t");
-    paragraphUa.appendText("\t");
-    for (var k = 0; k < 5; ++k) {
-        var text = paragraph.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");
-        var text2 = paragraphUa.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");
-        text.setForegroundColor("#666666");
-        text2.setForegroundColor("#666666");
+      text = paragraph.appendText("     " + valuableSkills[i].name);
+      text.setForegroundColor("#000000");
+      text.setBold(true);
+      ++skillParagraphIndx;
     }
 
-    text = paragraph.appendText("     " + valuableSkills[i].name);
-    text.setForegroundColor("#000000");
-    text.setBold(true);
-    ++cVEngSkillBriefPosition;
-    text = paragraphUa.appendText("     " + valuableSkills[i].name);
-    text.setForegroundColor("#000000");
-    text.setBold(true);
-    ++cVUaSkillBriefPosition;
+    cV.doc.saveAndClose();
   }
-
-  cVEngDoc.saveAndClose();
-  cVUaDoc.saveAndClose();
 }
 
 // deletes and old skill improvement card (if it has the same name) and

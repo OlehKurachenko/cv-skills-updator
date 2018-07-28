@@ -330,6 +330,8 @@ function updateCVSkillBriefSection() {
     var paragraph = cVEngDoc.getBody().insertParagraph(cVEngSkillBriefPosition, "");
     var paragraphUa = cVUaDoc.getBody().insertParagraph(cVUaSkillBriefPosition, "");
 
+    paragraph.appendText("\t");
+    paragraphUa.appendText("\t");
     for (var k = 0; k < 5; ++k) {
         var text = paragraph.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");
         var text2 = paragraphUa.appendText((k < valuableSkills[i].rate) ? "⬛" : "⬜");

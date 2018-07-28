@@ -203,8 +203,8 @@ var appendDocFooter = function (body) {
 function createSkillCard() {
 
   // appends body with new paragraph containing information about skill
-  function appendSkillParagraph(tabulation, body, skill, isMain) {
-    var skillP = body.appendParagraph(tabulation);
+  function appendSkillParagraph(body, skill, isMain) {
+    var skillP = body.appendParagraph((isMain) ? "" : "         ");
     var text = null;
 
     for (var k = 0; k < 5; ++k) {
@@ -214,8 +214,10 @@ function createSkillCard() {
 
     text = skillP.appendText("     " + skill.name);
     text.setForegroundColor("#000000");
-    if (isMain)
+    if (isMain) {
       text.setBold(true);
+      skillP.editAsText().setFontSize(9);
+    }
   }
 
   // constants
@@ -270,11 +272,11 @@ function createSkillCard() {
       var skill = skillTree.skills[j];
       if (skill.mainSkill.rate === 0)
         continue;
-      appendSkillParagraph("", skillCardBody, skill.mainSkill, true);
+      appendSkillParagraph(skillCardBody, skill.mainSkill, true);
       for (var l = 0; l < skill.subskills.length; ++l) {
         if (skill.subskills[l].rate === 0)
           break;
-        appendSkillParagraph("    ", skillCardBody, skill.subskills[l], false);
+        appendSkillParagraph(skillCardBody, skill.subskills[l], false);
       }
     }
   }

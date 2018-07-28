@@ -219,7 +219,7 @@ function createSkillCard() {
   }
 
   // constants
-  var skillCardDirName = "Google Script examples";
+  var skillCardDirName = "CV";
   var skillCardFileName = "Test Skill Card";
 
   // loading Drive & Docs resources

@@ -160,9 +160,25 @@ var skillCathegoryRateComparator = function (skillCat1, skillCat2) {
 
 // Data & Drive Utils
 
+var credentials = {
+    email: "oleh.kurachenko@gmail.com",
+    scriptName: "CV Updater script",
+    spreadsheetIDs: {
+        skillTracker: "1Re-gVD9OW57C94XR53CBr4UJVud5ywJOv7xlt60OWmY"
+    },
+    documentIDs: {
+        cVEnglish: "1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA",
+        cVUkrainian: "1xuQ7q-GeiNcQO24LxWJwMBUludryIF5MeqInhMq7QDM",
+        skillCard: "1DUKIPzoZdgpsPagfpTuCNnwXELXOkTMK92JidIgJvg4"
+    },
+    folderIDs: {
+        skillTracker: "1LmGcggpl0jc6NhxnCCnSzGOCZsvinifp"
+    }
+};
+
 var getSkillTrees = function () {
   // Skill Table spreadsheet direct Id
-  var skillsTable = SpreadsheetApp.openById("1Re-gVD9OW57C94XR53CBr4UJVud5ywJOv7xlt60OWmY");
+  var skillsTable = SpreadsheetApp.openById(credentials.spreadsheetIDs.skillTracker);
 
   var sheets = skillsTable.getSheets();
   var skillTrees = [];
@@ -197,7 +213,7 @@ var appendDocFooter = function (body) {
 
 // API
 
-// rewrites skills card Document with data from skills tracker table
+// Rewrites skills card Document with data from skills tracker table
 // noinspection JSUnusedGlobalSymbols
 function updateSkillCard() {
 
@@ -221,8 +237,7 @@ function updateSkillCard() {
     }
   }
 
-  // Skill Card spreadsheet direct Id
-  var skillCardDoc = DocumentApp.openById("1DUKIPzoZdgpsPagfpTuCNnwXELXOkTMK92JidIgJvg4");
+  var skillCardDoc = DocumentApp.openById(credentials.documentIDs.skillCard);
 
   var skillCardBody = skillCardDoc.getBody();
   var skillTrees = getSkillTrees();
@@ -240,8 +255,7 @@ function updateSkillCard() {
   subHeader.setHeading(DocumentApp.ParagraphHeading.HEADING2);
   subHeader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
   subHeader.setLinkUrl(
-    "https://drive.google.com/" +
-    "open?id=1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"); // link to CV doc
+    "https://drive.google.com/open?id=" + credentials.documentIDs.cVEnglish); // link to CV doc
 
   var rateMeasurementDetails = skillCardBody.appendParagraph(
       "Scale: Used once | Novice |️ Junior | Middle |️ Senior");
@@ -286,12 +300,12 @@ function updateCVSkillBriefSection() {
   var cVs = [
       {
         // Ukrainian CV document direct ID
-        doc: DocumentApp.openById("1xuQ7q-GeiNcQO24LxWJwMBUludryIF5MeqInhMq7QDM"),
+        doc: DocumentApp.openById(credentials.documentIDs.cVUkrainian),
         skillSectionHeading: "Ключові навички"
       },
       {
         // English CV document direct ID
-        doc: DocumentApp.openById("1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"),
+        doc: DocumentApp.openById(credentials.documentIDs.cVEnglish),
         skillSectionHeading: "Skills brief"
       }
   ];
@@ -346,18 +360,17 @@ function updateCVSkillBriefSection() {
   }
 }
 
-// deletes and old skill improvement card (if it has the same name) and
+// Deletes and old skill improvement card (if it has the same name) and
 // creates a new one. Skill improvement card contains tasks for a week
 // to improve skill
 // noinspection JSUnusedGlobalSymbols
 function createSkillImprovementCard() {
 
   // constants
-  var skillCardDirName = "Google Script examples";
   var skillCardFileName = "Test Skill Improvements Card "
     + Utilities.formatDate(new Date(), "GMT+3", "MMM dd yyyy");
 
-  var skillCardDir = DriveApp.getFoldersByName(skillCardDirName).next();
+  var skillCardDir = DriveApp.getFolderById(credentials.folderIDs.skillTracker);
 
   if (skillCardDir.getFilesByName(skillCardFileName).hasNext()) {
     skillCardDir.getFilesByName(skillCardFileName).next().setTrashed(true);
@@ -399,8 +412,7 @@ function createSkillImprovementCard() {
   subheader.setHeading(DocumentApp.ParagraphHeading.HEADING2);
   subheader.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
   subheader.setLinkUrl(
-    "https://drive.google.com/"
-    + "open?id=1aXUDQhL3jnsSBLi49Xcj7qs9nqXm2frz2ZFGdT9_siA"); // link to CV doc
+    "https://drive.google.com/open?id=" + credentials.documentIDs.cVEnglish);
   subheader.setSpacingBefore(0);
 
   var rateMeasurmentDetails = skillCardBody.appendParagraph(
@@ -525,14 +537,70 @@ function createSkillImprovementCard() {
   html.link = skillCardFile.getUrl();
   
   GmailApp.sendEmail(
-    "oleh.kurachenko@gmail.com",
+    credentials.email,
     "Skills improvement card updated",
     "",
     {
-      name: "CV Updater script",
+      name: credentials.scriptName,
       htmlBody: html.evaluate().getContent(),
       attachments: [
         skillCardFile.getAs(MimeType.PDF.toString())
       ]
     });
+}
+
+// Sends e-mail with reminder to update skill tracker spreadsheet
+// noinspection JSUnusedGlobalSymbols
+function sendSkillTrackerUpdateReminder() {
+  var html = HtmlService.createTemplateFromFile("skill_tracker_update_reminder");
+
+  var skillCardDirectory = DriveApp.getFolderById(credentials.folderIDs.skillTracker);
+  var skillCardDirectoryFiles = skillCardDirectory.getFiles();
+  var lastSkillCard = skillCardDirectoryFiles.next();
+  while (skillCardDirectoryFiles.hasNext()) {
+      var nextSKillCard = skillCardDirectoryFiles.next();
+      if (nextSKillCard.getDateCreated() > lastSkillCard.getDateCreated())
+          lastSkillCard = nextSKillCard;
+  }
+
+  // noinspection JSUndefinedPropertyAssignment
+    html.skillImprovementCardHref = lastSkillCard.getUrl();
+
+  GmailApp.sendEmail(
+      credentials.email,
+      "Skill Tracker Update Reminder",
+      "",
+      {
+          name: credentials.scriptName,
+          htmlBody: html.evaluate().getContent()
+      }
+  );
+}
+
+// Updates CV sections & skill card
+// noinspection JSUnusedGlobalSymbols
+function updateCV() {
+  updateSkillCard();
+  updateCVSkillBriefSection();
+
+  var html = HtmlService.createTemplateFromFile("cv_update_info");
+  // noinspection JSUndefinedPropertyAssignment
+    html.cVUkrainianHref = "https://drive.google.com/open?id="
+    + credentials.documentIDs.cVUkrainian;
+  // noinspection JSUndefinedPropertyAssignment
+    html.cVEnglishHref = "https://drive.google.com/open?id="
+    + credentials.documentIDs.cVEnglish;
+  // noinspection JSUndefinedPropertyAssignment
+    html.skillCardHref = "https://drive.google.com/open?id="
+    + credentials.documentIDs.skillCard;
+
+  GmailApp.sendEmail(
+      credentials.email,
+      "CV Update Info",
+      "",
+      {
+          name: credentials.scriptName,
+          htmlBody: html.evaluate().getContent()
+      }
+  );
 }

@@ -192,6 +192,7 @@ var appendDocFooter = function (body) {
   footer.editAsText().setFontFamily("Arial");
 
   footer.editAsText().setForegroundColor("#999999");
+  footer.editAsText().setFontSize(11);
   footer.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
 };
 
@@ -217,6 +218,8 @@ function createSkillCard() {
     if (isMain) {
       text.setBold(true);
       skillP.editAsText().setFontSize(9);
+    } else {
+      skillP.editAsText().setFontSize(11);
     }
   }
 

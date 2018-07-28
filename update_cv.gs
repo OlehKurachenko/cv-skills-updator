@@ -324,7 +324,7 @@ function updateCVSkillBriefSection() {
          ++skillParagraphIndx)
       ;
     skillParagraphIndx += 2;
-    for (var i = skillParagraphIndx; paragraphs[i].getText()[0] === "⬛"; ++i)
+    for (var i = skillParagraphIndx; paragraphs[i].getText()[1] === "⬛"; ++i)
       paragraphs[i].removeFromParent();
 
     for (var i = 0; i < valuableSkills.length; ++i) {
@@ -338,6 +338,7 @@ function updateCVSkillBriefSection() {
       text = paragraph.appendText("     " + valuableSkills[i].name);
       text.setForegroundColor("#000000");
       text.setBold(true);
+      paragraph.editAsText().setFontSize(11);
       ++skillParagraphIndx;
     }
 

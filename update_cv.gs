@@ -367,7 +367,7 @@ function updateCVSkillBriefSection() {
 function createSkillImprovementCard() {
 
   // constants
-  var skillCardFileName = "Test Skill Improvements Card "
+  var skillCardFileName = "Skill Improvements Card "
     + Utilities.formatDate(new Date(), "GMT+3", "MMM dd yyyy");
 
   var skillCardDir = DriveApp.getFolderById(credentials.folderIDs.skillTracker);
